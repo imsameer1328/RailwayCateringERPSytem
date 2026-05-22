@@ -8,8 +8,5 @@
         public string PasswordHash { get; set; }
         public string Phone { get; set; }
         public string Status { get; set; } = "Active";
-
-        public Guid RoleId { get; set; }
-        public Role Role { get; set; }
     }
 }
