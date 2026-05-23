@@ -11,6 +11,10 @@
 
 
         public Guid RoleId { get; set; }
-        public Role Role { get; set; }
+        public Role? Role { get; set; }
+
+
+        // One User can place many Orders
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }
