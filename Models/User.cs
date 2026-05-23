@@ -9,10 +9,8 @@
         public string Phone { get; set; }
         public string Status { get; set; } = "Active";
 
-        // Foreign Key
-        public Guid RoleId { get; set; }
 
-        // Navigation property: Each User belongs to one Role
+        public Guid RoleId { get; set; }
         public Role Role { get; set; }
     }
 }
