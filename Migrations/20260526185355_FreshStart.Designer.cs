@@ -12,8 +12,8 @@ using RailwayCateringERPSystem.Data;
 namespace RailwayCateringERPSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260526131509_RenameItemIdToMenuItemId")]
-    partial class RenameItemIdToMenuItemId
+    [Migration("20260526185355_FreshStart")]
+    partial class FreshStart
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
