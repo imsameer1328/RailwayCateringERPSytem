@@ -9,5 +9,7 @@ namespace RailwayCateringERPSystem.Models
         public string TrainNumber { get; set; }
         public string Route { get; set; }
         public int TotalCoaches { get; set; }
+
+        public ICollection<Journey> Journeys { get; set; } = new List<Journey>();
     }
 }

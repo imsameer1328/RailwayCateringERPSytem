@@ -11,5 +11,11 @@ namespace RailwayCateringERPSystem.Models
         public decimal MinimumThreshold { get; set; }      
         public string Unit { get; set; }
 
+        // One Ingredient is used in many MenuItems
+        public ICollection<MenuItemIngredient> MenuItemIngredients { get; set; } = new List<MenuItemIngredient>();
+
+        // One Ingredient has many InventoryLogs
+        public ICollection<InventoryLog> InventoryLogs { get; set; } = new List<InventoryLog>();
+
     }
 }
