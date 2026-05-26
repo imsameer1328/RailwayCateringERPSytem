@@ -11,8 +11,16 @@ namespace RailwayCateringERPSystem.Models
         public decimal TotalAmount { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+
         // Foreign Key — which User placed this order
         public Guid UserId { get; set; }
         public User? User { get; set; }
+
+        // Foreign Key — which Journey this order belongs to
+        public Guid JourneyId { get; set; }
+        public Journey? Journey { get; set; }
+
+        // Navigation Property — one Order has many OrderItems
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

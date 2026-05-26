@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RailwayCateringERPSystem.Data;
 
@@ -11,9 +12,11 @@ using RailwayCateringERPSystem.Data;
 namespace RailwayCateringERPSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260526130809_AllTablesCreated")]
+    partial class AllTablesCreated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -164,7 +167,7 @@ namespace RailwayCateringERPSystem.Migrations
                     b.Property<Guid>("IngredientId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("MenuItemId")
+                    b.Property<Guid>("ItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("QuantityNeeded")
@@ -179,7 +182,7 @@ namespace RailwayCateringERPSystem.Migrations
 
                     b.HasIndex("IngredientId");
 
-                    b.HasIndex("MenuItemId");
+                    b.HasIndex("ItemId");
 
                     b.ToTable("MenuItemIngredients");
                 });
@@ -427,7 +430,7 @@ namespace RailwayCateringERPSystem.Migrations
 
                     b.HasOne("RailwayCateringERPSystem.Models.MenuItem", "MenuItem")
                         .WithMany("MenuItemIngredients")
-                        .HasForeignKey("MenuItemId")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
