@@ -27,15 +27,15 @@ namespace RailwayCateringERPSystem.Models
 
         // Foreign Key — which Train is running
         public Guid TrainId { get; set; }
-        public Train Train { get; set; }
+        public Train? Train { get; set; }
 
         // Foreign Key — which Manager is responsible
         public Guid ManagerId { get; set; }
-        public User Manager { get; set; }
+        public User? Manager { get; set; }
 
         // Navigation Properties
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<InventoryLog> InventoryLogs { get; set; } = new List<InventoryLog>();
-        public Report Report { get; set; }
+        public Report? Report { get; set; }
     }
 }

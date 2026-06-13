@@ -40,6 +40,7 @@ namespace RailwayCateringERPSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTrain([FromBody] Train train)
         {
+            train.TrainId = Guid.NewGuid();
             _context.Trains.Add(train);
             await _context.SaveChangesAsync();
             return Ok(train);
@@ -56,7 +57,6 @@ namespace RailwayCateringERPSystem.Controllers
 
             train.TrainName = updatedTrain.TrainName;
             train.TrainNumber = updatedTrain.TrainNumber;
-            train.Route = updatedTrain.Route;
             train.TotalCoaches = updatedTrain.TotalCoaches;
 
             await _context.SaveChangesAsync();

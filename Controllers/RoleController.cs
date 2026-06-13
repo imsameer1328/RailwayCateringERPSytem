@@ -40,6 +40,7 @@ namespace RailwayCateringERPSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateRole([FromBody] Role role)
         {
+            role.RoleId = Guid.NewGuid();
             _context.Roles.Add(role);
             await _context.SaveChangesAsync();
             return Ok(role);
@@ -69,6 +70,12 @@ namespace RailwayCateringERPSystem.Controllers
 
             if (role == null)
                 return NotFound("Role not found");
+
+            // Check if any users have this role
+            var hasUsers = await _context.Users.AnyAsync(u => u.RoleId == id);
+
+            if (hasUsers)
+                return BadRequest("Cannot delete this role because it is assigned to one or more users. Please reassign those users first.");
 
             _context.Roles.Remove(role);
             await _context.SaveChangesAsync();

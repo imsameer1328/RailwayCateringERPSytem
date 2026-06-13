@@ -9,26 +9,45 @@ namespace RailwayCateringERPSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add DbContext — connects to SQL Server
+            // Add DbContext
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Add Controllers
-            builder.Services.AddControllers();
+            // Add Controllers — fix circular reference
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler =
+                        System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                });
 
             // Add Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowVue", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173",    // Vue.js frontend
+                                       "https://localhost:7275",   // MVC frontend
+                                       "http://localhost:5161"     // MVC frontend (http)
+                                      )
+                                      .AllowAnyHeader()
+                                      .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
-            // Swagger runs automatically in Development mode
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowVue");
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
