@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="FrontRailwayCateringERP\**" />
+    <Content Remove="FrontRailwayCateringERP\**" />
+    <EmbeddedResource Remove="FrontRailwayCateringERP\**" />
+    <None Remove="FrontRailwayCateringERP\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.16">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
