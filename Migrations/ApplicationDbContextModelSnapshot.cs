@@ -312,10 +312,6 @@ namespace RailwayCateringERPSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Route")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("TotalCoaches")
                         .HasColumnType("int");
 
@@ -517,8 +513,7 @@ namespace RailwayCateringERPSystem.Migrations
 
                     b.Navigation("Orders");
 
-                    b.Navigation("Report")
-                        .IsRequired();
+                    b.Navigation("Report");
                 });
 
             modelBuilder.Entity("RailwayCateringERPSystem.Models.MenuItem", b =>
