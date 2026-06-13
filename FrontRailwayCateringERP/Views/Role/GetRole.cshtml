@@ -1,0 +1,77 @@
+﻿@model List<FrontRailwayCateringERP.Models.RoleViewModel>
+
+@{
+    ViewData["Title"] = "Roles Management";
+    ViewData["ActivePage"] = "Roles";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        ⚠️ @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Page Title -->
+<div class="page-title mb-4">
+    <h2>Roles</h2>
+    <p>Manage all roles and their permissions</p>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+
+    <!-- Top Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span style="font-size:14px; font-weight:600; color:#666;">
+            Total Roles: @Model.Count
+        </span>
+        <a href="/Role/CreateRole" class="btn btn-purple">
+            + Add New Role
+        </a>
+    </div>
+
+    <!-- Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Role Name</th>
+                <th>Permissions</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        No roles found
+                    </td>
+                </tr>
+            }
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td><strong>@Model[i].Name</strong></td>
+                    <td style="color:#666;">@Model[i].Permissions</td>
+                    <td>
+                        <a href="/Role/EditRole/@Model[i].RoleId" class="btn btn-edit me-1">
+                            ✏️
+                        </a>
+                        <form method="post" action="/Role/DeleteRole/@Model[i].RoleId"
+                              style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-delete"
+                                    onclick="return confirm('Are you sure you want to delete this role?')">
+                                🗑️
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
