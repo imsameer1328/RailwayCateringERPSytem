@@ -31,7 +31,7 @@ namespace RailwayCateringERPSystem
                 options.AddPolicy("AllowVue", policy =>
                 {
                     policy.WithOrigins("http://localhost:5173",    // Vue.js frontend
-                                       "https://localhost:7275",   // MVC frontend
+                                       "https://localhost:7200",   // MVC frontend
                                        "http://localhost:5161"     // MVC frontend (http)
                                       )
                                       .AllowAnyHeader()
