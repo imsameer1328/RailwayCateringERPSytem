@@ -1,0 +1,62 @@
+@model FrontRailwayCateringERP.Models.MenuItemViewModel
+
+@{
+    ViewData["Title"] = "Edit Menu Item";
+    ViewData["ActivePage"] = "MenuItems";
+}
+
+<div class="page-title mb-4">
+    <h2>Edit Menu Item</h2>
+    <p>Update menu item details, pricing, and availability</p>
+</div>
+
+<div class="table-card" style="max-width: 600px;">
+    <form method="post" action="/MenuItem/EditMenuItem/@Model.MenuItemId">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label">Item Name</label>
+            <input name="Name"
+                   type="text"
+                   class="form-control"
+                   value="@Model.Name"
+                   required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            <input name="Category"
+                   type="text"
+                   class="form-control"
+                   value="@Model.Category"
+                   required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Price</label>
+            <input name="Price"
+                   type="number"
+                   step="0.01"
+                   class="form-control"
+                   value="@Model.Price"
+                   required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Availability Status</label>
+            <select name="AvailabilityStatus" class="form-control">
+                <option value="Available" selected="@(Model.AvailabilityStatus == "Available")">Available</option>
+                <option value="Unavailable" selected="@(Model.AvailabilityStatus == "Unavailable")">Unavailable</option>
+            </select>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-purple">
+                Update Menu Item
+            </button>
+            <a href="/MenuItem/GetMenuItem" class="btn btn-light" style="border-radius:10px;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>

@@ -20,9 +20,7 @@ namespace RailwayCateringERPSystem.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAllMenuItems()
         {
-            var menuItems = await _context.MenuItems
-                .Include(m => m.MenuItemIngredients)
-                .ToListAsync();
+            var menuItems = await _context.MenuItems.ToListAsync();
             return Ok(menuItems);
         }
 
@@ -31,7 +29,6 @@ namespace RailwayCateringERPSystem.Controllers
         public async Task<IActionResult> GetMenuItemById(Guid id)
         {
             var menuItem = await _context.MenuItems
-                .Include(m => m.MenuItemIngredients)
                 .FirstOrDefaultAsync(m => m.MenuItemId == id);
 
             if (menuItem == null)
