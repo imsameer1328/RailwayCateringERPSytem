@@ -1,0 +1,79 @@
+﻿@model List<FrontRailwayCateringERP.Models.TrainViewModel>
+
+@{
+    ViewData["Title"] = "Train Management";
+    ViewData["ActivePage"] = "Trains";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+        ⚠️ @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Page Title -->
+<div class="page-title mb-4">
+    <h2>Trains</h2>
+    <p>Manage all trains and their journeys</p>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+
+    <!-- Top Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span style="font-size:14px; font-weight:600; color:#666;">
+            Total Trains: @Model.Count
+        </span>
+        <a href="/Train/CreateTrain" class="btn btn-purple">
+            + Add New Train
+        </a>
+    </div>
+
+    <!-- Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Train Name</th>
+                <th>Train Number</th>
+                <th>Total Coaches</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No trains found
+                    </td>
+                </tr>
+            }
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td><strong>@Model[i].TrainName</strong></td>
+                    <td style="color:#666;">@Model[i].TrainNumber</td>
+                    <td>@Model[i].TotalCoaches</td>
+                    <td>
+                        <a href="/Train/EditTrain/@Model[i].TrainId" class="btn btn-edit me-1">
+                            ✏️
+                        </a>
+                        <form method="post" action="/Train/DeleteTrain/@Model[i].TrainId"
+                              style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-delete"
+                                    onclick="return confirm('Are you sure you want to delete this train?')">
+                                🗑️
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
