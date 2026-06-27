@@ -1,0 +1,130 @@
+@model FrontRailwayCateringERP.Models.MenuItemViewModel
+
+@{
+    ViewData["Title"] = "Edit Menu Item";
+    ViewData["ActivePage"] = "MenuItems";
+    var allIngredients = ViewBag.AllIngredients as List<FrontRailwayCateringERP.Models.IngredientViewModel> ?? new();
+}
+
+<div class="page-title">
+    <h2>Edit Menu Item</h2>
+    <p>Update menu item details, pricing, and ingredients</p>
+</div>
+
+<div class="form-section">
+    <form method="post" action="/MenuItem/EditMenuItem/@Model.MenuItemId">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-tag-fill"></i> Item Name</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-egg-fried" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="Name" type="text" class="form-control" value="@Model.Name" required style="border-radius:0 12px 12px 0;" />
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-grid-fill"></i> Category</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-collection" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="Category" type="text" class="form-control" value="@Model.Category" required style="border-radius:0 12px 12px 0;" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <label class="form-label"><i class="bi bi-currency-dollar"></i> Price</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                        <i class="bi bi-cash" style="color:#FF8A1F;"></i>
+                    </span>
+                    <input name="Price" type="number" step="0.01" class="form-control" value="@Model.Price" required style="border-radius:0 12px 12px 0;" />
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <label class="form-label"><i class="bi bi-toggle-on"></i> Availability Status</label>
+                <select name="AvailabilityStatus" class="form-select">
+                    <option value="Available" selected="@(Model.AvailabilityStatus == "Available")">Available</option>
+                    <option value="Unavailable" selected="@(Model.AvailabilityStatus == "Unavailable")">Unavailable</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-basket-fill"></i> Ingredients</label>
+            <div class="glass-card" style="padding:20px;">
+                <div id="ingredientList">
+                    @if (Model.Ingredients != null && Model.Ingredients.Count > 0)
+                    {
+                        for (int idx = 0; idx < Model.Ingredients.Count; idx++)
+                        {
+                            <div class="ingredient-row" style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+                                <select name="Ingredients[@idx].IngredientId" class="form-select" style="flex:2;">
+                                    <option value="">-- Select Ingredient --</option>
+                                    @foreach (var ing in allIngredients)
+                                    {
+                                        var selected = ing.IngredientId == Model.Ingredients[idx].IngredientId;
+                                        <option value="@ing.IngredientId" selected="@selected">@ing.Name (@ing.Unit)</option>
+                                    }
+                                </select>
+                                <input name="Ingredients[@idx].QuantityNeeded" type="number" step="0.01" class="form-control" value="@Model.Ingredients[idx].QuantityNeeded" placeholder="Qty" style="flex:1;" />
+                                <input name="Ingredients[@idx].Unit" type="text" class="form-control" value="@Model.Ingredients[idx].Unit" placeholder="Unit" style="flex:1;" />
+                                <button type="button" class="btn-icon-circle delete" onclick="this.parentElement.remove()" title="Remove"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="ingredient-row" style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+                            <select name="Ingredients[0].IngredientId" class="form-select" style="flex:2;">
+                                <option value="">-- Select Ingredient --</option>
+                                @foreach (var ing in allIngredients)
+                                {
+                                    <option value="@ing.IngredientId">@ing.Name (@ing.Unit)</option>
+                                }
+                            </select>
+                            <input name="Ingredients[0].QuantityNeeded" type="number" step="0.01" class="form-control" placeholder="Qty" style="flex:1;" />
+                            <input name="Ingredients[0].Unit" type="text" class="form-control" placeholder="Unit" style="flex:1;" />
+                            <button type="button" class="btn-icon-circle delete" onclick="this.parentElement.remove()" title="Remove"><i class="bi bi-x-lg"></i></button>
+                        </div>
+                    }
+                </div>
+                <button type="button" class="btn-secondary-glass" onclick="addIngredientRow()"><i class="bi bi-plus-lg"></i> Add Ingredient</button>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-orange"><i class="bi bi-check-lg"></i> Update Menu Item</button>
+            <a href="/MenuItem/GetMenuItem" class="btn-secondary-glass"><i class="bi bi-x-lg"></i> Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+var ingredientIndex = @((Model.Ingredients?.Count ?? 0));
+var allIngredients = @Html.Raw(Json.Serialize(allIngredients.Select(i => new { i.IngredientId, i.Name, i.Unit })));
+
+function addIngredientRow() {
+    var list = document.getElementById('ingredientList');
+    var div = document.createElement('div');
+    div.className = 'ingredient-row';
+    div.style.cssText = 'display:flex;gap:10px;margin-bottom:10px;align-items:center;';
+
+    var select = '<select name="Ingredients[' + ingredientIndex + '].IngredientId" class="form-select" style="flex:2;"><option value="">-- Select Ingredient --</option>';
+    allIngredients.forEach(function(ing) {
+        select += '<option value="' + ing.ingredientId + '">' + ing.name + ' (' + ing.unit + ')</option>';
+    });
+    select += '</select>';
+
+    div.innerHTML = select +
+        '<input name="Ingredients[' + ingredientIndex + '].QuantityNeeded" type="number" step="0.01" class="form-control" placeholder="Qty" style="flex:1;" />' +
+        '<input name="Ingredients[' + ingredientIndex + '].Unit" type="text" class="form-control" placeholder="Unit" style="flex:1;" />' +
+        '<button type="button" class="btn-icon-circle delete" onclick="this.parentElement.remove()" title="Remove"><i class="bi bi-x-lg"></i></button>';
+    list.appendChild(div);
+    ingredientIndex++;
+}
+</script>

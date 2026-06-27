@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RailwayCateringERPSystem.Data;
+using RailwayCateringERPSystem.Helpers;
 using RailwayCateringERPSystem.Models;
 
 namespace RailwayCateringERPSystem.Controllers
@@ -16,7 +17,6 @@ namespace RailwayCateringERPSystem.Controllers
             _context = context;
         }
 
-        // GET all users
         [HttpGet("all")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -26,7 +26,6 @@ namespace RailwayCateringERPSystem.Controllers
             return Ok(users);
         }
 
-        // GET one user by id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
@@ -38,17 +37,16 @@ namespace RailwayCateringERPSystem.Controllers
             return Ok(user);
         }
 
-        // POST — create a new user
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
             user.UserId = Guid.NewGuid();
+            user.PasswordHash = PasswordHelper.HashPassword(user.PasswordHash);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return Ok(user);
         }
 
-        // PUT — update existing user
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User updatedUser)
         {
@@ -62,11 +60,15 @@ namespace RailwayCateringERPSystem.Controllers
             user.Status = updatedUser.Status;
             user.RoleId = updatedUser.RoleId;
 
+            if (!string.IsNullOrEmpty(updatedUser.PasswordHash))
+            {
+                user.PasswordHash = PasswordHelper.HashPassword(updatedUser.PasswordHash);
+            }
+
             await _context.SaveChangesAsync();
             return Ok(user);
         }
 
-        // DELETE — delete a user
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
@@ -78,5 +80,60 @@ namespace RailwayCateringERPSystem.Controllers
             await _context.SaveChangesAsync();
             return Ok("User deleted successfully");
         }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            if (await _context.Users.AnyAsync())
+                return StatusCode(403, new { message = "Registration is closed. A Super Admin already exists." });
+
+            await DbInitializer.SeedRolesAsync(_context);
+
+            var adminRole = await _context.Roles.FirstAsync(r => r.Name == "Super Admin");
+
+            var user = new User
+            {
+                UserId = Guid.NewGuid(),
+                FullName = request.FullName,
+                Username = request.Username,
+                PasswordHash = PasswordHelper.HashPassword(request.Password),
+                Phone = request.Phone ?? "",
+                Status = "Active",
+                RoleId = adminRole.RoleId
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new LoginResponse
+            {
+                UserId = user.UserId,
+                FullName = user.FullName,
+                Username = user.Username,
+                RoleName = "Super Admin",
+                RoleId = user.RoleId
+            });
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Username == request.Username);
+
+            if (user == null || !PasswordHelper.VerifyPassword(request.Password, user.PasswordHash))
+                return Unauthorized(new { message = "Invalid username or password" });
+
+            return Ok(new LoginResponse
+            {
+                UserId = user.UserId,
+                FullName = user.FullName,
+                Username = user.Username,
+                RoleName = user.Role?.Name ?? "",
+                RoleId = user.RoleId
+            });
+        }
+
     }
 }

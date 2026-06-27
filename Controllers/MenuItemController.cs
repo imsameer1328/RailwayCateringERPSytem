@@ -53,7 +53,8 @@ namespace RailwayCateringERPSystem.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMenuItem(Guid id, [FromBody] MenuItem updatedMenuItem)
         {
-            var menuItem = await _context.MenuItems.FindAsync(id);
+            var menuItem = await _context.MenuItems
+                .FirstOrDefaultAsync(m => m.MenuItemId == id);
 
             if (menuItem == null)
                 return NotFound("Menu item not found");
@@ -63,6 +64,26 @@ namespace RailwayCateringERPSystem.Controllers
             menuItem.Price = updatedMenuItem.Price;
             menuItem.AvailabilityStatus = updatedMenuItem.AvailabilityStatus;
 
+            var existingIngredients = await _context.MenuItemIngredients
+                .Where(mi => mi.MenuItemId == id)
+                .ToListAsync();
+            _context.MenuItemIngredients.RemoveRange(existingIngredients);
+
+            if (updatedMenuItem.MenuItemIngredients != null)
+            {
+                foreach (var ing in updatedMenuItem.MenuItemIngredients)
+                {
+                    _context.MenuItemIngredients.Add(new MenuItemIngredient
+                    {
+                        MenuItemIngredientId = Guid.NewGuid(),
+                        MenuItemId = id,
+                        IngredientId = ing.IngredientId,
+                        QuantityNeeded = ing.QuantityNeeded,
+                        Unit = ing.Unit
+                    });
+                }
+            }
+
             await _context.SaveChangesAsync();
             return Ok(menuItem);
         }
@@ -71,11 +92,14 @@ namespace RailwayCateringERPSystem.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMenuItem(Guid id)
         {
-            var menuItem = await _context.MenuItems.FindAsync(id);
+            var menuItem = await _context.MenuItems
+                .Include(m => m.MenuItemIngredients)
+                .FirstOrDefaultAsync(m => m.MenuItemId == id);
 
             if (menuItem == null)
                 return NotFound("Menu item not found");
 
+            _context.MenuItemIngredients.RemoveRange(menuItem.MenuItemIngredients);
             _context.MenuItems.Remove(menuItem);
             await _context.SaveChangesAsync();
             return Ok("Menu item deleted successfully");

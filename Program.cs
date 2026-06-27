@@ -5,7 +5,7 @@ namespace RailwayCateringERPSystem
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +13,7 @@ namespace RailwayCateringERPSystem
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Add Controllers — fix circular reference
+            // Add Controllers ï¿½ fix circular reference
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -40,6 +40,13 @@ namespace RailwayCateringERPSystem
             });
 
             var app = builder.Build();
+
+            // Seed database
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await DbInitializer.SeedRolesAsync(context);
+            }
 
             if (app.Environment.IsDevelopment())
             {

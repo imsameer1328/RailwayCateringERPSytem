@@ -3,68 +3,69 @@
     ViewData["Title"] = "Edit User";
     ViewData["ActivePage"] = "Users";
 }
-<div class="page-title mb-4">
+<div class="page-title">
     <h2>Edit User</h2>
     <p>Update user details and role</p>
 </div>
-<div class="table-card" style="max-width: 600px;">
+<div class="form-section">
     <form method="post" action="/User/EditUser/@Model.UserId">
         @Html.AntiForgeryToken()
-        <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input name="FullName"
-                   type="text"
-                   class="form-control"
-                   value="@Model.FullName"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-person-fill"></i> Full Name</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-person" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="FullName" type="text" class="form-control" value="@Model.FullName" required style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input name="Username"
-                   type="text"
-                   class="form-control"
-                   value="@Model.Username"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-at"></i> Username</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-person-badge" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="Username" type="text" class="form-control" value="@Model.Username" required style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Phone</label>
-            <input name="Phone"
-                   type="text"
-                   class="form-control"
-                   value="@Model.Phone"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-phone-fill"></i> Phone</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-telephone" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="Phone" type="text" class="form-control" value="@Model.Phone" required style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input name="PasswordHash"
-                   type="password"
-                   class="form-control"
-                   value="@Model.PasswordHash"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-lock-fill"></i> Password</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-key" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="PasswordHash" type="password" class="form-control" placeholder="Leave empty to keep current" style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Role</label>
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-shield-fill-check"></i> Role</label>
             <select name="RoleId" class="form-select" required>
                 <option value="">-- Select Role --</option>
                 @foreach (var role in Model.RoleList)
                 {
-                    <option value="@role.RoleId"
-                            selected="@(role.RoleId == Model.RoleId ? "selected" : null)">
-                        @role.Name
-                    </option>
+                    <option value="@role.RoleId" selected="@(role.RoleId == Model.RoleId ? "selected" : null)">@role.Name</option>
                 }
             </select>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Status</label>
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-toggle-on"></i> Status</label>
             <select name="Status" class="form-select">
                 <option value="Active" selected="@(Model.Status == "Active" ? "selected" : null)">Active</option>
                 <option value="Inactive" selected="@(Model.Status == "Inactive" ? "selected" : null)">Inactive</option>
             </select>
         </div>
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-purple">Update User</button>
-            <a href="/User/GetUser" class="btn btn-light" style="border-radius:10px;">Cancel</a>
+        <div class="form-actions">
+            <button type="submit" class="btn-orange"><i class="bi bi-check-lg"></i> Update User</button>
+            <a href="/User/GetUser" class="btn-secondary-glass"><i class="bi bi-x-lg"></i> Cancel</a>
         </div>
     </form>
 </div>

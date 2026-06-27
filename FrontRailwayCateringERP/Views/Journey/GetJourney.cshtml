@@ -1,0 +1,91 @@
+@model List<FrontRailwayCateringERP.Models.JourneyViewModel>
+
+@{
+    ViewData["Title"] = "Journeys Management";
+    ViewData["ActivePage"] = "Journeys";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-glass alert-dismissible fade show mb-4 d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="page-title">
+    <h2>Journeys</h2>
+    <p>Manage all train journeys and their schedules</p>
+</div>
+
+<div class="glass-card">
+    <div class="table-top">
+        <span class="table-count"><i class="bi bi-database me-1"></i> Total Journeys: @Model.Count</span>
+        <div class="table-actions">
+            <div class="table-search">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search journeys..." />
+            </div>
+            <a href="/Journey/CreateJourney" class="btn-orange">
+                <i class="bi bi-plus-lg"></i> Add New Journey
+            </a>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Train</th>
+                    <th>Date</th>
+                    <th>Departure</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Manager</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="9"><div class="empty-state"><i class="bi bi-map"></i><p>No journeys found</p></div></td></tr>
+                }
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td><strong>@(Model[i].Train?.TrainName ?? "N/A")</strong></td>
+                        <td>@Model[i].JourneyDate.ToString("dd-MM-yyyy")</td>
+                        <td>@Model[i].DepartureTime.ToString("HH:mm")</td>
+                        <td>@Model[i].Origin</td>
+                        <td>@Model[i].Destination</td>
+                        <td>@(Model[i].Manager?.FullName ?? "N/A")</td>
+                        <td>
+                            <span class="badge @(Model[i].Status switch
+                            {
+                                "Scheduled" => "badge-blue",
+                                "InProgress" => "badge-green",
+                                "Completed" => "badge-gray",
+                                "Cancelled" => "badge-red",
+                                _ => "badge-orange"
+                            })">@Model[i].Status</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <a href="/Journey/EditJourney/@Model[i].JourneyId" class="btn-icon-circle edit" title="Edit">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <form method="post" action="/Journey/DeleteJourney/@Model[i].JourneyId" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-icon-circle delete"
+                                        onclick="return confirm('Are you sure you want to delete this journey?')" title="Delete">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -3,11 +3,178 @@
     ViewData["ActivePage"] = "Dashboard";
 }
 
-<div class="page-title mb-4">
+<div class="page-title">
     <h2>Dashboard</h2>
-    <p>Welcome to Railway Catering ERP System</p>
+    <p>Welcome back, Super Admin. Here's what's happening today.</p>
 </div>
 
-<div class="table-card">
-    <p class="text-muted">Dashboard content will be added later.</p>
+<div class="stats-grid">
+    <div class="stat-card animate-in">
+        <div class="stat-top">
+            <div class="stat-icon orange"><i class="bi bi-cart-check-fill"></i></div>
+            <span class="stat-trend up"><i class="bi bi-arrow-up-short"></i> 12%</span>
+        </div>
+        <div class="stat-number">156</div>
+        <div class="stat-label">Orders Today</div>
+    </div>
+    <div class="stat-card animate-in">
+        <div class="stat-top">
+            <div class="stat-icon green"><i class="bi bi-currency-dollar"></i></div>
+            <span class="stat-trend up"><i class="bi bi-arrow-up-short"></i> 8%</span>
+        </div>
+        <div class="stat-number">$4,850</div>
+        <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card animate-in">
+        <div class="stat-top">
+            <div class="stat-icon blue"><i class="bi bi-box-seam-fill"></i></div>
+            <span class="stat-trend down"><i class="bi bi-arrow-down-short"></i> 3%</span>
+        </div>
+        <div class="stat-number">76%</div>
+        <div class="stat-label">Inventory Status</div>
+    </div>
+    <div class="stat-card animate-in">
+        <div class="stat-top">
+            <div class="stat-icon purple"><i class="bi bi-truck-fill"></i></div>
+            <span class="stat-trend up"><i class="bi bi-arrow-up-short"></i> 5%</span>
+        </div>
+        <div class="stat-number">23</div>
+        <div class="stat-label">Pending Deliveries</div>
+    </div>
+    <div class="stat-card animate-in">
+        <div class="stat-top">
+            <div class="stat-icon red"><i class="bi bi-people-fill"></i></div>
+            <span class="stat-trend up"><i class="bi bi-arrow-up-short"></i> 18%</span>
+        </div>
+        <div class="stat-number">42</div>
+        <div class="stat-label">Active Staff</div>
+    </div>
 </div>
+
+<div class="charts-grid">
+    <div class="chart-card animate-in">
+        <div class="chart-title"><i class="bi bi-graph-up-arrow" style="color:#FF8A1F;margin-right:6px;"></i> Revenue Overview</div>
+        <canvas id="revenueChart" height="220"></canvas>
+    </div>
+    <div class="chart-card animate-in">
+        <div class="chart-title"><i class="bi bi-pie-chart-fill" style="color:#FF8A1F;margin-right:6px;"></i> Order Distribution</div>
+        <canvas id="orderChart" height="220"></canvas>
+    </div>
+</div>
+
+<div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="chart-card animate-in">
+        <div class="chart-title"><i class="bi bi-bar-chart-fill" style="color:#FF8A1F;margin-right:6px;"></i> Monthly Performance</div>
+        <canvas id="monthlyChart" height="200"></canvas>
+    </div>
+    <div class="chart-card animate-in">
+        <div class="chart-title"><i class="bi bi-cart-fill" style="color:#FF8A1F;margin-right:6px;"></i> Recent Sales</div>
+        <canvas id="salesChart" height="200"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const orange = '#FF8A1F';
+    const orangeLight = 'rgba(255,138,31,0.15)';
+    const orangeGrad = (ctx) => {
+        const g = ctx.createLinearGradient(0,0,0,200);
+        g.addColorStop(0, 'rgba(255,138,31,0.3)');
+        g.addColorStop(1, 'rgba(255,138,31,0.01)');
+        return g;
+    };
+
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+            datasets: [{
+                label: 'Revenue',
+                data: [2800, 3500, 4100, 3800, 4600, 4850],
+                borderColor: orange,
+                backgroundColor: orangeGrad,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: orange,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    new Chart(document.getElementById('orderChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Main Course', 'Beverages', 'Snacks', 'Desserts'],
+            datasets: [{
+                data: [42, 28, 18, 12],
+                backgroundColor: ['#FF8A1F', '#FFB45C', '#FFD699', '#FFE8CC'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11, family: 'Inter' }, usePointStyle: true } } },
+            cutout: '65%'
+        }
+    });
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+            datasets: [{
+                label: 'Orders',
+                data: [120, 190, 210, 175, 240, 260],
+                backgroundColor: function(ctx) {
+                    const g = ctx.chart.ctx.createLinearGradient(0,0,0,200);
+                    g.addColorStop(0, orange);
+                    g.addColorStop(1, '#FFB45C');
+                    return g;
+                },
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+            datasets: [{
+                label: 'Sales',
+                data: [320, 480, 410, 560, 520, 690, 580],
+                borderColor: '#FFB45C',
+                backgroundColor: 'rgba(255,180,92,0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#FFB45C',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
+        }
+    });
+});
+</script>
+}

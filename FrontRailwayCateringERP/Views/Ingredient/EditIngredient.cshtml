@@ -1,0 +1,70 @@
+@model FrontRailwayCateringERP.Models.IngredientViewModel
+
+@{
+    ViewData["Title"] = "Edit Ingredient";
+    ViewData["ActivePage"] = "Ingredients";
+}
+
+<div class="page-title">
+    <h2>Edit Ingredient</h2>
+    <p>Update ingredient stock details</p>
+</div>
+
+<div class="form-section">
+    <form method="post" action="/Ingredient/EditIngredient/@Model.IngredientId">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-tag-fill"></i> Ingredient Name</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-basket" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="Name" type="text" class="form-control" value="@Model.Name" required
+                       style="border-radius:0 12px 12px 0;" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <label class="form-label"><i class="bi bi-box-seam-fill"></i> Current Stock</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                        <i class="bi bi-bar-chart" style="color:#FF8A1F;"></i>
+                    </span>
+                    <input name="CurrentStock" type="number" step="0.01" class="form-control" value="@Model.CurrentStock" required
+                           style="border-radius:0 12px 12px 0;" />
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <label class="form-label"><i class="bi bi-exclamation-triangle-fill"></i> Minimum Threshold</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                        <i class="bi bi-arrow-down" style="color:#FF8A1F;"></i>
+                    </span>
+                    <input name="MinimumThreshold" type="number" step="0.01" class="form-control" value="@Model.MinimumThreshold" required
+                           style="border-radius:0 12px 12px 0;" />
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <label class="form-label"><i class="bi bi-rulers"></i> Unit</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                        <i class="bi bi-graph-up" style="color:#FF8A1F;"></i>
+                    </span>
+                    <input name="Unit" type="text" class="form-control" value="@Model.Unit" required
+                           style="border-radius:0 12px 12px 0;" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-orange">
+                <i class="bi bi-check-lg"></i> Update Ingredient
+            </button>
+            <a href="/Ingredient/GetIngredient" class="btn-secondary-glass">
+                <i class="bi bi-x-lg"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>

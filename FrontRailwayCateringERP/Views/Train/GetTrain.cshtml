@@ -7,73 +7,68 @@
 
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-        ⚠️ @TempData["Error"]
+    <div class="alert alert-glass alert-dismissible fade show mb-4 d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
-<!-- Page Title -->
-<div class="page-title mb-4">
+<div class="page-title">
     <h2>Trains</h2>
     <p>Manage all trains and their journeys</p>
 </div>
 
-<!-- Table Card -->
-<div class="table-card">
-
-    <!-- Top Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <span style="font-size:14px; font-weight:600; color:#666;">
-            Total Trains: @Model.Count
-        </span>
-        <a href="/Train/CreateTrain" class="btn btn-purple">
-            + Add New Train
-        </a>
+<div class="glass-card">
+    <div class="table-top">
+        <span class="table-count"><i class="bi bi-database me-1"></i> Total Trains: @Model.Count</span>
+        <div class="table-actions">
+            <div class="table-search">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search trains..." />
+            </div>
+            <a href="/Train/CreateTrain" class="btn-orange">
+                <i class="bi bi-plus-lg"></i> Add New Train
+            </a>
+        </div>
     </div>
-
-    <!-- Table -->
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Train Name</th>
-                <th>Train Number</th>
-                <th>Total Coaches</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Count == 0)
-            {
+    <div class="table-container">
+        <table class="glass-table">
+            <thead>
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
-                        No trains found
-                    </td>
+                    <th>#</th>
+                    <th>Train Name</th>
+                    <th>Train Number</th>
+                    <th>Total Coaches</th>
+                    <th style="text-align:center;">Actions</th>
                 </tr>
-            }
-            @for (int i = 0; i < Model.Count; i++)
-            {
-                <tr>
-                    <td>@(i + 1)</td>
-                    <td><strong>@Model[i].TrainName</strong></td>
-                    <td style="color:#666;">@Model[i].TrainNumber</td>
-                    <td>@Model[i].TotalCoaches</td>
-                    <td>
-                        <a href="/Train/EditTrain/@Model[i].TrainId" class="btn btn-edit me-1">
-                            ✏️
-                        </a>
-                        <form method="post" action="/Train/DeleteTrain/@Model[i].TrainId"
-                              style="display:inline;">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-delete"
-                                    onclick="return confirm('Are you sure you want to delete this train?')">
-                                🗑️
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5"><div class="empty-state"><i class="bi bi-train-front"></i><p>No trains found</p></div></td></tr>
+                }
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td><strong>@Model[i].TrainName</strong></td>
+                        <td>@Model[i].TrainNumber</td>
+                        <td>@Model[i].TotalCoaches</td>
+                        <td style="text-align:center;">
+                            <a href="/Train/EditTrain/@Model[i].TrainId" class="btn-icon-circle edit" title="Edit">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <form method="post" action="/Train/DeleteTrain/@Model[i].TrainId" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-icon-circle delete"
+                                        onclick="return confirm('Are you sure you want to delete this train?')" title="Delete">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

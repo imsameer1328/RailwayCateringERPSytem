@@ -1,10 +1,12 @@
 ﻿using FrontRailwayCateringERP.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
 
 namespace FrontRailwayCateringERP.Controllers
 {
+    [Authorize(Roles = "Super Admin, Manager")]
     public class TrainController : Controller
     {
         private readonly HttpClient _httpClient;

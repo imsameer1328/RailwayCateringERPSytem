@@ -3,51 +3,48 @@
     ViewData["ActivePage"] = "Trains";
 }
 
-<!-- Page Title -->
-<div class="page-title mb-4">
+<div class="page-title">
     <h2>Add New Train</h2>
     <p>Create a new train and define its details</p>
 </div>
 
-<!-- Form Card -->
-<div class="table-card" style="max-width: 600px;">
+<div class="form-section">
     <form method="post" action="/Train/CreateTrain">
         @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label class="form-label">Train Name</label>
-            <input name="TrainName"
-                   type="text"
-                   class="form-control"
-                   placeholder="e.g. Green Line Express"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-train-front-fill"></i> Train Name</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-train-front" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="TrainName" type="text" class="form-control" placeholder="e.g. Green Line Express" required style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Train Number</label>
-            <input name="TrainNumber"
-                   type="text"
-                   class="form-control"
-                   placeholder="e.g. 101A"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-hash"></i> Train Number</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-123" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="TrainNumber" type="text" class="form-control" placeholder="e.g. 101A" required style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Total Coaches</label>
-            <input name="TotalCoaches"
-                   type="number"
-                   class="form-control"
-                   placeholder="e.g. 20"
-                   required />
+        <div class="mb-4">
+            <label class="form-label"><i class="bi bi-layers-fill"></i> Total Coaches</label>
+            <div class="input-group">
+                <span class="input-group-text" style="background:rgba(255,138,31,0.08);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px 0 0 12px;border-right:none;">
+                    <i class="bi bi-grid-3x3" style="color:#FF8A1F;"></i>
+                </span>
+                <input name="TotalCoaches" type="number" class="form-control" placeholder="e.g. 20" required style="border-radius:0 12px 12px 0;" />
+            </div>
         </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-purple">
-                Save Train
-            </button>
-            <a href="/Train/GetTrain" class="btn btn-light" style="border-radius:10px;">
-                Cancel
-            </a>
+        <div class="form-actions">
+            <button type="submit" class="btn-orange"><i class="bi bi-check-lg"></i> Save Train</button>
+            <a href="/Train/GetTrain" class="btn-secondary-glass"><i class="bi bi-x-lg"></i> Cancel</a>
         </div>
     </form>
 </div>

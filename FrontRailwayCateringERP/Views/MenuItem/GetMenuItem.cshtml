@@ -1,0 +1,91 @@
+@model List<FrontRailwayCateringERP.Models.MenuItemViewModel>
+
+@{
+    ViewData["Title"] = "Menu Items Management";
+    ViewData["ActivePage"] = "MenuItems";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-glass alert-dismissible fade show mb-4 d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="page-title">
+    <h2>Menu Items</h2>
+    <p>Manage all menu items and their ingredients</p>
+</div>
+
+<div class="glass-card">
+    <div class="table-top">
+        <span class="table-count"><i class="bi bi-database me-1"></i> Total Menu Items: @Model.Count</span>
+        <div class="table-actions">
+            <div class="table-search">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search menu items..." />
+            </div>
+            <a href="/MenuItem/CreateMenuItem" class="btn-orange">
+                <i class="bi bi-plus-lg"></i> Add New Menu Item
+            </a>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Ingredients</th>
+                    <th>Status</th>
+                    <th style="text-align:center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="7"><div class="empty-state"><i class="bi bi-egg-fried"></i><p>No menu items found</p></div></td></tr>
+                }
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var ings = Model[i].Ingredients;
+                    var ingText = ings != null && ings.Count > 0
+                        ? string.Join(", ", ings.Where(x => !string.IsNullOrEmpty(x.IngredientName)).Select(x => x.IngredientName))
+                        : "-";
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td><strong>@Model[i].Name</strong></td>
+                        <td><span class="badge-orange">@Model[i].Category</span></td>
+                        <td><strong>@Model[i].Price.ToString("C")</strong></td>
+                        <td style="font-size:12px;color:#666;max-width:200px;">@ingText</td>
+                        <td>
+                            @if (Model[i].AvailabilityStatus == "Available")
+                            {
+                                <span class="badge-green">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge-red">Unavailable</span>
+                            }
+                        </td>
+                        <td style="text-align:center;">
+                            <a href="/MenuItem/EditMenuItem/@Model[i].MenuItemId" class="btn-icon-circle edit" title="Edit">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <form method="post" action="/MenuItem/DeleteMenuItem/@Model[i].MenuItemId" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-icon-circle delete"
+                                        onclick="return confirm('Are you sure you want to delete this menu item?')" title="Delete">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
