@@ -1,0 +1,106 @@
+@model FrontRailwayCateringERP.Models.CreateOrderViewModel
+@{
+    ViewData["Title"] = "Create Order";
+    ViewData["ActivePage"] = "Orders";
+}
+<div class="page-title">
+    <h2>Create Order</h2>
+    <p>Select coach, seat, and menu items</p>
+</div>
+
+<div class="form-section" style="max-width:900px;">
+    <form method="post" action="/Order/CreateOrder">
+        @Html.AntiForgeryToken()
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;">
+            <div>
+                <label class="form-label"><i class="bi bi-map"></i> Journey</label>
+                <select name="JourneyId" class="form-select" required>
+                    <option value="">-- Select Journey --</option>
+                    @foreach (var j in Model.JourneyList)
+                    {
+                        <option value="@j.JourneyId">@j.Origin → @j.Destination (@j.JourneyDate.ToString("MMM dd"))</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label"><i class="bi bi-train-front"></i> Coach Number</label>
+                <input name="CoachNumber" type="text" class="form-control" placeholder="e.g. C1" required value="@Model.CoachNumber" />
+            </div>
+            <div>
+                <label class="form-label"><i class="bi bi-seat"></i> Seat Number</label>
+                <input name="SeatNumber" type="text" class="form-control" placeholder="e.g. S5" required value="@Model.SeatNumber" />
+            </div>
+        </div>
+
+        <label class="form-label" style="margin-bottom:12px;"><i class="bi bi-egg-fried"></i> Menu Items</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:24px;">
+            @for (int i = 0; i < Model.MenuItems.Count; i++)
+            {
+                var item = Model.MenuItems[i];
+                var outOfStock = item.AvailabilityStatus == "Out of Stock";
+                <div class="menu-item-card @(outOfStock ? "oos" : "")">
+                    <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600;font-size:13px;color:#2B2B2B;">@item.Name</div>
+                            <div style="font-size:11px;color:#999;margin-top:2px;">@item.Category</div>
+                            <div style="font-size:15px;font-weight:700;color:#FF8A1F;margin-top:4px;">$@item.Price.ToString("F2")</div>
+                            @if (outOfStock)
+                            {
+                                <span class="badge-red" style="margin-top:4px;display:inline-block;">Out of Stock</span>
+                            }
+                            else
+                            {
+                                <span class="badge-green" style="margin-top:4px;display:inline-block;">Available</span>
+                            }
+                        </div>
+                        @if (!outOfStock)
+                        {
+                            <div style="min-width:60px;text-align:right;">
+                                <input type="hidden" name="selectedItemIds" value="@item.MenuItemId" />
+                                <input name="quantities" type="number" class="form-control qty-input" value="0" min="0" max="50" style="width:60px;text-align:center;padding:6px 4px;font-size:13px;" />
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="selectedItemIds" value="@item.MenuItemId" />
+                            <input name="quantities" type="hidden" value="0" />
+                            <div style="min-width:60px;text-align:right;">
+                                <span style="font-size:11px;color:#EF4444;font-weight:600;">Unavailable</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-glass" style="margin-bottom:18px;">
+                @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div><i class="bi bi-exclamation-circle-fill"></i> @err.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <div class="form-actions">
+            <button type="submit" class="btn-orange"><i class="bi bi-check-lg"></i> Place Order</button>
+            <a href="/Order/GetOrders" class="btn-secondary-glass"><i class="bi bi-x-lg"></i> Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .menu-item-card {
+        background: rgba(255,255,255,0.55);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 16px;
+        padding: 16px;
+        transition: all 0.25s ease;
+    }
+    .menu-item-card:hover { background: rgba(255,255,255,0.8); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+    .menu-item-card.oos { opacity: 0.6; background: rgba(239,68,68,0.04); border-color: rgba(239,68,68,0.15); }
+    .qty-input:focus { border-color: #FF8A1F; box-shadow: 0 0 0 3px rgba(255,138,31,0.1); }
+</style>

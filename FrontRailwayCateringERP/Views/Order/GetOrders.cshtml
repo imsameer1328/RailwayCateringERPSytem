@@ -1,0 +1,229 @@
+@model List<FrontRailwayCateringERP.Models.OrderViewModel>
+@{
+    ViewData["Title"] = "Orders Management";
+    ViewData["ActivePage"] = "Orders";
+
+    string OrderStatus(OrderViewModel o)
+    {
+        var s = o.OrderItems.Select(i => i.KitchenStatus).ToList();
+        if (s.All(x => x == "Delivered")) return "Delivered";
+        if (s.Any(x => x == "Pending")) return "In Kitchen";
+        if (s.Any(x => x == "Cooking")) return "Cooking";
+        if (s.Any(x => x == "Ready")) return "Ready";
+        if (s.Any(x => x == "PickedUp")) return "Picked Up";
+        return o.Status ?? "Pending";
+    }
+
+    string BadgeClass(string s) => s switch
+    {
+        "In Kitchen" => "badge-orange",
+        "Cooking" => "badge-blue",
+        "Ready" => "badge-green",
+        "Picked Up" => "badge-purple",
+        "Delivered" => "badge-green",
+        "Completed" => "badge-green",
+        _ => "badge-orange"
+    };
+
+    string BadgeIcon(string s) => s switch
+    {
+        "In Kitchen" => "bi-clock-history",
+        "Cooking" => "bi-fire",
+        "Ready" => "bi-hand-index-thumb",
+        "Picked Up" => "bi-walk",
+        "Delivered" => "bi-check2-all",
+        "Completed" => "bi-check2-all",
+        _ => "bi-clock-history"
+    };
+
+}
+<div class="page-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+        <h2>Orders</h2>
+        <p>Track every order's status from placement to delivery</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <span id="refresh-indicator" style="font-size:11px;color:#999;"><i class="bi bi-arrow-clockwise"></i> Auto-refreshing...</span>
+        <button onclick="location.reload()" class="btn-secondary-glass" style="padding:6px 14px;font-size:12px;"><i class="bi bi-arrow-repeat"></i> Refresh</button>
+        <a href="/Order/CreateOrder" class="btn-orange"><i class="bi bi-plus-lg"></i> New Order</a>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert-glass" style="margin-bottom:18px;">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+    </div>
+}
+
+<div class="glass-card">
+    <div class="table-top">
+        <span class="table-count">@Model.Count order(s)</span>
+        <div style="display:flex;gap:8px;font-size:11px;color:#999;align-items:center;">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FF8A1F;"></span> In Kitchen</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3B82F6;"></span> Cooking</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22C55E;"></span> Ready</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8B5CF6;"></span> Picked Up</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22C55E;opacity:0.5;"></span> Delivered</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Coach / Seat</th>
+                    <th>Items & Status</th>
+                    <th>Total</th>
+                    <th>Order Status</th>
+                    <th>Progress</th>
+                    <th>Waiter</th>
+                    <th>Date</th>
+                    <th style="width:100px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="9"><div class="empty-state"><i class="bi bi-receipt"></i><p>No orders yet</p></div></td></tr>
+                }
+                @foreach (var order in Model.OrderByDescending(o => o.CreatedAt))
+                {
+                    var aggStatus = OrderStatus(order);
+                    var totalItems = order.OrderItems.Count;
+                    var doneCount = order.OrderItems.Count(i => i.KitchenStatus == "Delivered");
+                    var pct = totalItems > 0 ? (doneCount * 100 / totalItems) : 0;
+                    <tr class="order-row @(aggStatus == "Ready" ? "row-ready" : aggStatus == "Picked Up" ? "row-picked" : "")">
+                        <td><strong style="font-size:13px;">#@order.OrderId.ToString().Substring(0,8)</strong></td>
+                        <td style="font-size:13px;">
+                            <i class="bi bi-train-front" style="color:#999;"></i> @order.CoachNumber &middot; @order.SeatNumber
+                        </td>
+                        <td style="min-width:220px;">
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <div class="order-item-cell">
+                                    <span style="font-weight:500;font-size:12px;">@item.MenuItem?.Name</span>
+                                    <span style="color:#999;font-size:11px;">x@(item.Quantity)</span>
+                                    <span class="badge-@(item.KitchenStatus switch {
+                                        "Pending" => "orange",
+                                        "Cooking" => "blue",
+                                        "Ready" => "green",
+                                        "PickedUp" => "purple",
+                                        "Delivered" => "green",
+                                        _ => "orange"
+                                    })" style="font-size:8px;padding:1px 6px;border-radius:10px;margin-left:4px;">@item.KitchenStatus</span>
+                                </div>
+                            }
+                        </td>
+                        <td><strong style="font-size:14px;color:#FF8A1F;">$@order.TotalAmount.ToString("F2")</strong></td>
+                        <td>
+                            <span class="@BadgeClass(aggStatus)" style="font-size:10px;padding:3px 10px;border-radius:20px;white-space:nowrap;">
+                                <i class="@BadgeIcon(aggStatus)"></i> @aggStatus
+                            </span>
+                        </td>
+                        <td style="min-width:100px;">
+                            <div class="progress-cell">
+                                <div class="progress-bar-mini">
+                                    @{
+                                        var p = order.OrderItems.Count(i => i.KitchenStatus == "Pending");
+                                        var c = order.OrderItems.Count(i => i.KitchenStatus == "Cooking");
+                                        var r = order.OrderItems.Count(i => i.KitchenStatus == "Ready");
+                                        var pk = order.OrderItems.Count(i => i.KitchenStatus == "PickedUp");
+                                        var d = order.OrderItems.Count(i => i.KitchenStatus == "Delivered");
+                                    }
+                                    @if (p > 0) { <div class="seg pending" style="flex:@(p);"></div> }
+                                    @if (c > 0) { <div class="seg cooking" style="flex:@(c);"></div> }
+                                    @if (r > 0) { <div class="seg ready" style="flex:@(r);"></div> }
+                                    @if (pk > 0) { <div class="seg picked" style="flex:@(pk);"></div> }
+                                    @if (d > 0) { <div class="seg delivered" style="flex:@(d);"></div> }
+                                </div>
+                                <span style="font-size:10px;color:#999;">@doneCount/@totalItems</span>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;">@order.User?.FullName</td>
+                        <td style="font-size:11px;color:#999;white-space:nowrap;">@order.CreatedAt.ToString("MMM dd, HH:mm")</td>
+                        <td>
+                            <div class="action-group">
+                                @foreach (var item in order.OrderItems.Where(i => i.KitchenStatus == "Ready").Take(1))
+                                {
+                                    <form method="post" action="/Waiter/PickupItem" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@item.OrderItemId" />
+                                        <button type="submit" class="btn-icon-circle view" title="Pick Up"><i class="bi bi-hand-index-thumb"></i></button>
+                                    </form>
+                                }
+                                @foreach (var item in order.OrderItems.Where(i => i.KitchenStatus == "PickedUp").Take(1))
+                                {
+                                    <form method="post" action="/Waiter/DeliverItem" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@item.OrderItemId" />
+                                        <input type="hidden" name="orderId" value="@order.OrderId" />
+                                        <button type="submit" class="btn-icon-circle edit" title="Deliver"><i class="bi bi-check-lg"></i></button>
+                                    </form>
+                                }
+                                <form method="post" action="/Order/DeleteOrder/@order.OrderId" style="display:inline;" onsubmit="return confirm('Delete this order?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-icon-circle delete" title="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .order-row td { vertical-align: middle; padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+    .order-row.row-ready { background: rgba(34,197,94,0.04); }
+    .order-row.row-picked { background: rgba(139,92,246,0.04); }
+
+    .order-item-cell {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 0;
+        flex-wrap: wrap;
+    }
+
+    .progress-cell {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .progress-bar-mini {
+        display: flex;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        background: rgba(0,0,0,0.04);
+        min-width: 60px;
+        flex: 1;
+    }
+    .progress-bar-mini .seg.pending { background: #FF8A1F; }
+    .progress-bar-mini .seg.cooking { background: #3B82F6; }
+    .progress-bar-mini .seg.ready { background: #22C55E; }
+    .progress-bar-mini .seg.picked { background: #8B5CF6; }
+    .progress-bar-mini .seg.delivered { background: #22C55E; opacity: 0.5; }
+
+    .badge-purple {
+        background: rgba(139,92,246,0.12);
+        color: #8B5CF6;
+        font-weight: 600;
+    }
+
+    .action-group { display: flex; gap: 4px; }
+</style>
+
+<script>
+    let countdown = 15;
+    const indicator = document.getElementById('refresh-indicator');
+    if (indicator) {
+        setInterval(() => {
+            countdown--;
+            if (countdown <= 0) { location.reload(); }
+            indicator.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refreshing in ' + countdown + 's...';
+        }, 1000);
+    }
+</script>

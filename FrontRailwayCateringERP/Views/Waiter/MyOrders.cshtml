@@ -1,0 +1,268 @@
+@model List<FrontRailwayCateringERP.Models.OrderViewModel>
+@{
+    ViewData["Title"] = "My Orders";
+    ViewData["ActivePage"] = "MyOrders";
+
+    string OrderStatus(OrderViewModel o)
+    {
+        var statuses = o.OrderItems.Select(i => i.KitchenStatus).ToList();
+        if (statuses.All(s => s == "Delivered")) return "Delivered";
+        if (statuses.Any(s => s == "Pending")) return "In Kitchen";
+        if (statuses.Any(s => s == "Cooking")) return "Cooking";
+        if (statuses.Any(s => s == "Ready")) return "Ready";
+        if (statuses.Any(s => s == "PickedUp")) return "Picked Up";
+        return "In Kitchen";
+    }
+
+    // badge color + icon per aggregate status
+    string BadgeClass(string s) => s switch
+    {
+        "In Kitchen" => "badge-orange",
+        "Cooking" => "badge-blue",
+        "Ready" => "badge-green",
+        "Picked Up" => "badge-purple",
+        "Delivered" => "badge-green",
+        _ => "badge-orange"
+    };
+    string BadgeIcon(string s) => s switch
+    {
+        "In Kitchen" => "bi-clock-history",
+        "Cooking" => "bi-fire",
+        "Ready" => "bi-hand-index-thumb",
+        "Picked Up" => "bi-walk",
+        "Delivered" => "bi-check2-all",
+        _ => "bi-clock-history"
+    };
+
+    var activeOrders = Model.Where(o => OrderStatus(o) != "Delivered").ToList();
+    var deliveredOrders = Model.Where(o => OrderStatus(o) == "Delivered").ToList();
+}
+<div class="page-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>
+        <h2>My Orders</h2>
+        <p>Track every order in real time — from kitchen to customer</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <span id="refresh-indicator" style="font-size:11px;color:#999;"><i class="bi bi-arrow-clockwise"></i> Auto-refreshing...</span>
+        <button onclick="location.reload()" class="btn-secondary-glass" style="padding:6px 14px;font-size:12px;"><i class="bi bi-arrow-repeat"></i> Refresh</button>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert-glass" style="margin-bottom:18px;"><i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]</div>
+}
+
+@if (activeOrders.Count == 0 && deliveredOrders.Count == 0)
+{
+    <div class="glass-card">
+        <div class="empty-state"><i class="bi bi-receipt"></i><p>No orders yet. Go place an order!</p></div>
+    </div>
+}
+
+@if (activeOrders.Any())
+{
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px;">
+        @foreach (var order in activeOrders.OrderByDescending(o => o.CreatedAt))
+        {
+            var aggStatus = OrderStatus(order);
+            <div class="od-card @(aggStatus == "Ready" ? "pulse-green" : aggStatus == "Picked Up" ? "border-purple" : "")">
+                <!-- Card top: order summary + aggregate badge -->
+                <div class="od-top">
+                    <div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <strong style="font-size:15px;color:#2B2B2B;">#@order.OrderId.ToString().Substring(0,8)</strong>
+                            <span class="@BadgeClass(aggStatus)" style="font-size:10px;padding:3px 10px;border-radius:20px;">
+                                <i class="@BadgeIcon(aggStatus)"></i> @aggStatus
+                            </span>
+                        </div>
+                        <div style="font-size:12px;color:#999;margin-top:4px;">
+                            <i class="bi bi-train-front"></i> Coach @order.CoachNumber &middot; Seat @order.SeatNumber
+                            &middot; <i class="bi bi-clock"></i> @order.CreatedAt.ToString("MMM dd, HH:mm")
+                        </div>
+                    </div>
+                    <div style="font-size:13px;font-weight:700;color:#FF8A1F;">$@order.TotalAmount.ToString("F2")</div>
+                </div>
+
+                <!-- Progress bar -->
+                @{
+                    var totalItems = order.OrderItems.Count;
+                    var deliveredCount = order.OrderItems.Count(i => i.KitchenStatus == "Delivered");
+                    var pickedCount = order.OrderItems.Count(i => i.KitchenStatus == "PickedUp");
+                    var readyCount = order.OrderItems.Count(i => i.KitchenStatus == "Ready");
+                    var cookingCount = order.OrderItems.Count(i => i.KitchenStatus == "Cooking");
+                    var pendingCount = order.OrderItems.Count(i => i.KitchenStatus == "Pending");
+                    var completed = deliveredCount + pickedCount;
+                    var pct = totalItems > 0 ? (completed * 100 / totalItems) : 0;
+                }
+                <div class="od-progress">
+                    <div class="od-progress-bar">
+                        @if (pendingCount > 0) { <div class="od-prog-seg pending" style="flex:@(pendingCount);"></div> }
+                        @if (cookingCount > 0) { <div class="od-prog-seg cooking" style="flex:@(cookingCount);"></div> }
+                        @if (readyCount > 0) { <div class="od-prog-seg ready" style="flex:@(readyCount);"></div> }
+                        @if (pickedCount > 0) { <div class="od-prog-seg picked" style="flex:@(pickedCount);"></div> }
+                        @if (deliveredCount > 0) { <div class="od-prog-seg delivered" style="flex:@(deliveredCount);"></div> }
+                    </div>
+                    <div class="od-prog-labels">
+                        <span style="color:#FF8A1F;">@pendingCount pending</span>
+                        <span style="color:#3B82F6;">@cookingCount cooking</span>
+                        <span style="color:#22C55E;">@readyCount ready</span>
+                        <span style="color:#8B5CF6;">@pickedCount picked</span>
+                        <span style="color:#22C55E;">@deliveredCount done</span>
+                    </div>
+                </div>
+
+                <!-- Items list with per-item status and actions -->
+                <div style="padding:6px 18px 14px;">
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <div class="od-item">
+                            <div style="flex:1;min-width:0;">
+                                <span style="font-weight:600;font-size:13px;color:#2B2B2B;">@item.MenuItem?.Name</span>
+                                <span style="color:#999;font-size:12px;">x@(item.Quantity)</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span class="badge-@(item.KitchenStatus switch {
+                                    "Pending" => "orange",
+                                    "Cooking" => "blue",
+                                    "Ready" => "green",
+                                    "PickedUp" => "purple",
+                                    "Delivered" => "green",
+                                    _ => "orange"
+                                })" style="font-size:9px;padding:2px 8px;border-radius:12px;">@item.KitchenStatus</span>
+                                @if (item.KitchenStatus == "Ready")
+                                {
+                                    <form method="post" action="/Waiter/PickupItem" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@item.OrderItemId" />
+                                        <button type="submit" class="btn-icon-circle view" title="Pick Up"><i class="bi bi-hand-index-thumb"></i></button>
+                                    </form>
+                                }
+                                @if (item.KitchenStatus == "PickedUp")
+                                {
+                                    <form method="post" action="/Waiter/DeliverItem" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@item.OrderItemId" />
+                                        <input type="hidden" name="orderId" value="@order.OrderId" />
+                                        <button type="submit" class="btn-icon-circle edit" title="Deliver"><i class="bi bi-check-lg"></i></button>
+                                    </form>
+                                }
+                                @if (item.KitchenStatus == "Delivered")
+                                {
+                                    <span style="font-size:15px;color:#22C55E;"><i class="bi bi-check-circle-fill"></i></span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (deliveredOrders.Any())
+{
+    <details style="margin-top:20px;">
+        <summary style="cursor:pointer;font-size:13px;color:#999;font-weight:600;padding:10px 0;">
+            <i class="bi bi-check2-all"></i> Delivered Orders (@deliveredOrders.Count)
+        </summary>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:10px;">
+            @foreach (var order in deliveredOrders.OrderByDescending(o => o.CreatedAt))
+            {
+                <div class="od-card" style="opacity:0.55;">
+                    <div class="od-top" style="padding:10px 14px;">
+                        <div>
+                            <strong style="font-size:13px;color:#2B2B2B;">#@order.OrderId.ToString().Substring(0,8)</strong>
+                            <div style="font-size:11px;color:#999;">Coach @order.CoachNumber &middot; Seat @order.SeatNumber</div>
+                        </div>
+                        <span class="badge-green" style="font-size:9px;"><i class="bi bi-check2-all"></i> Delivered</span>
+                    </div>
+                    <div style="padding:0 14px 10px;font-size:11px;color:#bbb;">
+                        <i class="bi bi-clock"></i> @order.CreatedAt.ToString("MMM dd, HH:mm")
+                    </div>
+                </div>
+            }
+        </div>
+    </details>
+}
+
+<style>
+    .od-card {
+        background: rgba(255,255,255,0.72);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        transition: all 0.25s ease;
+    }
+    .od-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+    .od-card.pulse-green { border-left: 4px solid #22C55E; }
+    .od-card.border-purple { border-left: 4px solid #8B5CF6; }
+
+    .od-top {
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .od-progress { padding: 10px 18px 4px; }
+    .od-progress-bar {
+        display: flex;
+        height: 6px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: rgba(0,0,0,0.04);
+    }
+    .od-prog-seg.pending { background: #FF8A1F; }
+    .od-prog-seg.cooking { background: #3B82F6; }
+    .od-prog-seg.ready { background: #22C55E; }
+    .od-prog-seg.picked { background: #8B5CF6; }
+    .od-prog-seg.delivered { background: #22C55E; opacity: 0.5; }
+
+    .od-prog-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 9px;
+        margin-top: 4px;
+        color: #bbb;
+    }
+
+    .od-item {
+        display: flex;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+        gap: 8px;
+    }
+    .od-item:last-child { border-bottom: none; }
+
+    .badge-purple {
+        background: rgba(139,92,246,0.12);
+        color: #8B5CF6;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+    }
+
+    @@keyframes softPulse {
+        0%, 100% { box-shadow: 0 4px 20px rgba(34,197,94,0); }
+        50% { box-shadow: 0 4px 24px rgba(34,197,94,0.15); }
+    }
+    .od-card.pulse-green { animation: softPulse 2s ease-in-out infinite; }
+</style>
+
+<script>
+    let countdown = 12;
+    const indicator = document.getElementById('refresh-indicator');
+    setInterval(() => {
+        countdown--;
+        if (countdown <= 0) { location.reload(); }
+        indicator.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refreshing in ' + countdown + 's...';
+    }, 1000);
+</script>

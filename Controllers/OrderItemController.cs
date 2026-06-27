@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RailwayCateringERPSystem.Data;
 using RailwayCateringERPSystem.Models;
+using System.Text.Json;
 
 namespace RailwayCateringERPSystem.Controllers
 {
@@ -60,17 +61,16 @@ namespace RailwayCateringERPSystem.Controllers
             return Ok(orderItem);
         }
 
-        // PUT — update kitchen status
+        // PUT — update kitchen status only (preserves Quantity/UnitPrice)
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrderItem(Guid id, [FromBody] OrderItem updatedOrderItem)
+        public async Task<IActionResult> UpdateOrderItem(Guid id, [FromBody] JsonElement body)
         {
             var orderItem = await _context.OrderItems.FindAsync(id);
             if (orderItem == null)
                 return NotFound("Order item not found");
 
-            orderItem.KitchenStatus = updatedOrderItem.KitchenStatus;
-            orderItem.Quantity = updatedOrderItem.Quantity;
-            orderItem.UnitPrice = updatedOrderItem.UnitPrice;
+            if (body.TryGetProperty("kitchenStatus", out var ks))
+                orderItem.KitchenStatus = ks.GetString() ?? orderItem.KitchenStatus;
 
             await _context.SaveChangesAsync();
             return Ok(orderItem);

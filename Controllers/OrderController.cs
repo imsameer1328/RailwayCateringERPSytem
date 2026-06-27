@@ -23,6 +23,23 @@ namespace RailwayCateringERPSystem.Controllers
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Journey)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .ToListAsync();
+            return Ok(orders);
+        }
+
+        // GET orders by user id
+        [HttpGet("by-user/{userId}")]
+        public async Task<IActionResult> GetOrdersByUser(Guid userId)
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Journey)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
             return Ok(orders);
         }
@@ -34,6 +51,8 @@ namespace RailwayCateringERPSystem.Controllers
             var order = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Journey)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null)
